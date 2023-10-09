@@ -1,7 +1,7 @@
-package seb39_40.coffeewithme.user.repository;
+package seb39_40.coffeewithme.wishlist.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import seb39_40.coffeewithme.user.domain.Wishlist;
+import seb39_40.coffeewithme.wishlist.domain.Wishlist;
 
 import java.util.List;
 import java.util.Optional;

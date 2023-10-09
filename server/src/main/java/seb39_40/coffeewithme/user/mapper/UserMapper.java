@@ -6,10 +6,10 @@ import seb39_40.coffeewithme.cafe.dto.CafeResponseDto;
 import seb39_40.coffeewithme.image.domain.Image;
 import seb39_40.coffeewithme.review.domain.Review;
 import seb39_40.coffeewithme.user.domain.User;
-import seb39_40.coffeewithme.user.dto.UserRequestDto;
-import seb39_40.coffeewithme.user.dto.UserResponseDto;
-import seb39_40.coffeewithme.user.dto.UserReviewResponseDto;
-import seb39_40.coffeewithme.user.dto.WishlistResponse;
+import seb39_40.coffeewithme.user.dto.request.UserRequestDto;
+import seb39_40.coffeewithme.user.dto.response.UserResponseDto;
+import seb39_40.coffeewithme.user.dto.response.UserReviewResponseDto;
+import seb39_40.coffeewithme.wishlist.dto.WishlistResponse;
 
 import java.util.List;
 import java.util.stream.Collectors;

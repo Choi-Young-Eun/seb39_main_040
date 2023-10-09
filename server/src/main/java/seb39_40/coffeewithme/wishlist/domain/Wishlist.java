@@ -1,7 +1,8 @@
-package seb39_40.coffeewithme.user.domain;
+package seb39_40.coffeewithme.wishlist.domain;
 
 import lombok.*;
 import seb39_40.coffeewithme.cafe.domain.Cafe;
+import seb39_40.coffeewithme.user.domain.User;
 
 import javax.persistence.*;
 

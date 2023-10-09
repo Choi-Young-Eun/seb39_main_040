@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import seb39_40.coffeewithme.security.userdetails.CustomUserDetails;
 import seb39_40.coffeewithme.review.domain.Review;
 import seb39_40.coffeewithme.user.domain.User;
-import seb39_40.coffeewithme.user.dto.UserRequestDto;
+import seb39_40.coffeewithme.user.dto.request.UserRequestDto;
 import seb39_40.coffeewithme.user.mapper.UserMapper;
 import seb39_40.coffeewithme.user.service.UserService;
 

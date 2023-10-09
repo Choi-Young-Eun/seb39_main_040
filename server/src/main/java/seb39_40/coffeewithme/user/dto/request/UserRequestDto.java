@@ -1,4 +1,4 @@
-package seb39_40.coffeewithme.user.dto;
+package seb39_40.coffeewithme.user.dto.request;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

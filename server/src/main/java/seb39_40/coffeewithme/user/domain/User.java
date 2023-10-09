@@ -3,6 +3,7 @@ package seb39_40.coffeewithme.user.domain;
 import lombok.*;
 import seb39_40.coffeewithme.image.domain.Image;
 import seb39_40.coffeewithme.review.domain.Review;
+import seb39_40.coffeewithme.wishlist.domain.Wishlist;
 
 import javax.persistence.*;
 import java.time.LocalDate;

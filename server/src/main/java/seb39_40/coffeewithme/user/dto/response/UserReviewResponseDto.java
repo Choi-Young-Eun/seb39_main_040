@@ -1,4 +1,4 @@
-package seb39_40.coffeewithme.user.dto;
+package seb39_40.coffeewithme.user.dto.response;
 
 import lombok.*;
 import seb39_40.coffeewithme.review.domain.ReviewTag;

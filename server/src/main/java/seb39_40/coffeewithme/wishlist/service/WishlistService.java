@@ -1,4 +1,4 @@
-package seb39_40.coffeewithme.user.service;
+package seb39_40.coffeewithme.wishlist.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -7,8 +7,9 @@ import org.springframework.stereotype.Service;
 import seb39_40.coffeewithme.cafe.domain.Cafe;
 import seb39_40.coffeewithme.cafe.service.CafeService;
 import seb39_40.coffeewithme.exception.BusinessLogicException;
-import seb39_40.coffeewithme.user.domain.Wishlist;
-import seb39_40.coffeewithme.user.repository.WishlistRepository;
+import seb39_40.coffeewithme.wishlist.domain.Wishlist;
+import seb39_40.coffeewithme.wishlist.repository.WishlistRepository;
+import seb39_40.coffeewithme.user.service.UserService;
 
 import java.util.ArrayList;
 import java.util.List;
