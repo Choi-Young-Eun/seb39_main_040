@@ -3,7 +3,6 @@ package seb39_40.coffeewithme.user.domain;
 import lombok.*;
 import seb39_40.coffeewithme.image.domain.Image;
 import seb39_40.coffeewithme.review.domain.Review;
-import seb39_40.coffeewithme.wishlist.domain.Wishlist;
 
 import javax.persistence.*;
 import java.time.LocalDate;
@@ -13,9 +12,7 @@ import java.util.List;
 
 @Entity
 @Getter
-@Builder
 @NoArgsConstructor
-@AllArgsConstructor
 public class User {
     @Id @Column(name = "USER_ID")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,14 +31,24 @@ public class User {
     @Column(nullable = false, length = 50, name="reg_dt")
     private LocalDate registerDate;
 
-    @OneToOne(mappedBy = "user")
+    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
     private Image profilePhoto;
-
-    @Transient
-    private List<Wishlist> likes=new ArrayList<>();
 
     @OneToMany(mappedBy = "user")
     private List<Review> reviews=new ArrayList<>();
+
+    @Builder
+    public User(String userName, String password, String email, String mobile, String roles,
+         UserStatus status, LocalDate registerDate, Image profilePhoto){
+        this.userName=userName;
+        this.password=password;
+        this.email=email;
+        this.mobile=mobile;
+        this.roles=roles;
+        this.status=status;
+        this.registerDate=registerDate;
+        this.profilePhoto=profilePhoto;
+    }
 
     public List<String> getRoleList(){
         if(this.roles.length() > 0){
@@ -49,19 +56,6 @@ public class User {
         }
         return new ArrayList<>();
     }
-
-    public enum UserStatus {
-        USER_SIGNUP("signup"),
-        USER_WITHDRAW("withdraw");
-
-        @Getter
-        private String status;
-
-        UserStatus(String status) {
-            this.status = status;
-        }
-    }
-
 
     public void addReview(Review review) {
         this.reviews.add(review);
