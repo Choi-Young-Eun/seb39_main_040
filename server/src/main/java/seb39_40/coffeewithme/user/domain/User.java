@@ -31,7 +31,7 @@ public class User {
     @Column(nullable = false, length = 50, name="reg_dt")
     private LocalDate registerDate;
 
-    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "user")
     private Image profilePhoto;
 
     @OneToMany(mappedBy = "user")

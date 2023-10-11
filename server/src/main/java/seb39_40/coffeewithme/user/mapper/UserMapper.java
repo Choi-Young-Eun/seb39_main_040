@@ -3,11 +3,7 @@ package seb39_40.coffeewithme.user.mapper;
 import org.mapstruct.Mapper;
 
 import seb39_40.coffeewithme.cafe.dto.CafeResponseDto;
-import seb39_40.coffeewithme.image.domain.Image;
 import seb39_40.coffeewithme.review.domain.Review;
-import seb39_40.coffeewithme.user.domain.User;
-import seb39_40.coffeewithme.user.dto.request.UserRequestDto;
-import seb39_40.coffeewithme.user.dto.response.UserResponseDto;
 import seb39_40.coffeewithme.user.dto.response.UserReviewResponseDto;
 import seb39_40.coffeewithme.wishlist.dto.WishlistResponse;
 
@@ -16,20 +12,6 @@ import java.util.stream.Collectors;
 
 @Mapper(componentModel = "spring")
 public interface UserMapper {
-    User userJoinToUser(UserRequestDto.UserJoin userJoin);
-    UserResponseDto.UserInfo userToUserInfo(User user);
-
-    default User userUpdateDtoToUser(UserRequestDto.UserUpdate update){
-        Image img = new Image();
-        img.setId(update.getProfilePhoto());
-        User user= User.builder()
-                .userName(update.getUserName())
-                .mobile(update.getMobile())
-                .profilePhoto(img)
-                .build();
-        return user;
-    }
-
     default WishlistResponse cafesToWishlistDto(List<CafeResponseDto.SimpleCafeInfo> cafes){
         return new WishlistResponse(cafes);
     }

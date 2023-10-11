@@ -9,10 +9,13 @@ import org.springframework.web.bind.annotation.*;
 import seb39_40.coffeewithme.security.userdetails.CustomUserDetails;
 import seb39_40.coffeewithme.review.domain.Review;
 import seb39_40.coffeewithme.user.domain.User;
-import seb39_40.coffeewithme.user.dto.request.UserRequestDto;
+import seb39_40.coffeewithme.user.dto.request.UserJoinRequestDto;
+import seb39_40.coffeewithme.user.dto.request.UserUpdateRequestDto;
+import seb39_40.coffeewithme.user.dto.response.UserInfoResponseDto;
 import seb39_40.coffeewithme.user.mapper.UserMapper;
 import seb39_40.coffeewithme.user.service.UserService;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @Slf4j
@@ -25,10 +28,9 @@ public class UserController {
     private final UserMapper userMapper;
 
     @PostMapping("/signup")
-    public ResponseEntity joinUser(@RequestBody UserRequestDto.UserJoin join){
-        User user = userMapper.userJoinToUser(join);
-        userService.createUser(user);
-        log.info("** Success Signup [{}]",user.getEmail());
+    public ResponseEntity joinUser(@Valid @RequestBody UserJoinRequestDto joinDto){
+        userService.createUser(joinDto);
+        log.info("** Success Signup [{}]",joinDto.getEmail());
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
@@ -63,16 +65,15 @@ public class UserController {
     public ResponseEntity getUserInformation(@AuthenticationPrincipal CustomUserDetails userDetails){
         log.info("** Get [{}] Information",userDetails.getUsername());
         User user = userService.getInformation(userDetails.getUsername());
-        return new ResponseEntity<>(userMapper.userToUserInfo(user), HttpStatus.OK);
+        return new ResponseEntity<>(UserInfoResponseDto.from(user), HttpStatus.OK);
     }
 
     @PatchMapping("/information")
     public ResponseEntity updateUserInformation(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                                @RequestBody UserRequestDto.UserUpdate userRequestDto){
+                                                @Valid @RequestBody UserUpdateRequestDto updateDto){
         log.info("** Patch [{}] Information",userDetails.getUsername());
-        User user = userMapper.userUpdateDtoToUser(userRequestDto);
-        User result = userService.updateInformation(userDetails.getUsername(), user);
-        return new ResponseEntity<>(userMapper.userToUserInfo(result),HttpStatus.OK);
+        User result = userService.updateInformation(userDetails.getUsername(), updateDto);
+        return new ResponseEntity<>(UserInfoResponseDto.from(result), HttpStatus.OK);
     }
 
     @GetMapping("/reviews")

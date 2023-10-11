@@ -9,6 +9,9 @@ import seb39_40.coffeewithme.image.service.ImageService;
 import seb39_40.coffeewithme.review.domain.Review;
 import seb39_40.coffeewithme.review.repository.ReviewRepository;
 import seb39_40.coffeewithme.user.domain.User;
+import seb39_40.coffeewithme.user.domain.UserStatus;
+import seb39_40.coffeewithme.user.dto.request.UserJoinRequestDto;
+import seb39_40.coffeewithme.user.dto.request.UserUpdateRequestDto;
 import seb39_40.coffeewithme.user.repository.UserRepository;
 
 import java.time.LocalDate;
@@ -25,25 +28,25 @@ public class UserService {
     private final ReviewRepository reviewRepository;
     private final ImageService imageService;
 
-    public void createUser(User user) {
-        verifyEmail(user.getEmail());
+    public void createUser(UserJoinRequestDto joinDto) {
+        verifyEmail(joinDto.getEmail());
         Long profilePhotoId = imageService.saveDefaultImage();
-        User result = User.builder()
-                .userName(user.getUserName())
-                .mobile(user.getMobile())
-                .email(user.getEmail())
-                .password(bCryptPasswordEncoder.encode(user.getPassword()))
+        User newUser = User.builder()
+                .userName(joinDto.getUserName())
+                .mobile(joinDto.getMobile())
+                .email(joinDto.getEmail())
+                .password(bCryptPasswordEncoder.encode(joinDto.getPassword()))
                 .roles("ROLE_USER")
-                .status(User.UserStatus.USER_SIGNUP)
+                .status(UserStatus.USER_SIGNUP)
                 .registerDate(LocalDate.now())
                 .build();
-        result.setProfilePhoto(imageService.findById(profilePhotoId));
-        userRepository.save(result);
+        newUser.setProfilePhoto(imageService.findById(profilePhotoId));
+        userRepository.save(newUser);
     }
 
     public void withdrawUser(String email){
         User user = findByEmail(email);
-        user.updateStatus(User.UserStatus.USER_WITHDRAW);
+        user.updateStatus(UserStatus.USER_WITHDRAW);
         user.getProfilePhoto().setUser(null);
         userRepository.save(user);
     }
@@ -53,11 +56,11 @@ public class UserService {
         return user;
     }
 
-    public User updateInformation(String email,User temp){
-        User result = findByEmail(email);
-        result.updateInformation(temp.getUserName(), temp.getMobile(),
-                imageService.findById(temp.getProfilePhoto().getId()));
-        return userRepository.save(result);
+    public User updateInformation(String email, UserUpdateRequestDto updateDto){
+        User newUser = findByEmail(email);
+        newUser.updateInformation(updateDto.getUserName(), updateDto.getMobile(),
+                imageService.findById(updateDto.getProfilePhotoId()));
+        return userRepository.save(newUser);
     }
 
     public List<Review> getReview(Long userId) {
@@ -70,7 +73,7 @@ public class UserService {
 
     public void verifyUser(String email){
         User user=userRepository.findByEmail(email).get();
-        if(user.getStatus().equals(User.UserStatus.USER_WITHDRAW)) {
+        if(user.getStatus().equals(UserStatus.USER_WITHDRAW)) {
             throw new BusinessLogicException(HttpStatus.FORBIDDEN,"이미 탈퇴한 회원입니다.");
         }
     }
