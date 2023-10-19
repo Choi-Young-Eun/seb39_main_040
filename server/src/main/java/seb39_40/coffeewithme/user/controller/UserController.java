@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.*;
 import seb39_40.coffeewithme.security.userdetails.CustomUserDetails;
 import seb39_40.coffeewithme.review.domain.Review;
 import seb39_40.coffeewithme.user.domain.User;
-import seb39_40.coffeewithme.user.dto.request.UserJoinRequestDto;
 import seb39_40.coffeewithme.user.dto.request.UserUpdateRequestDto;
 import seb39_40.coffeewithme.user.dto.response.UserInfoResponseDto;
 import seb39_40.coffeewithme.user.mapper.UserMapper;
@@ -21,24 +20,12 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/users")
+@RequestMapping("/api/users")
 public class UserController {
 
     private final UserService userService;
     private final UserMapper userMapper;
 
-    @PostMapping("/signup")
-    public ResponseEntity joinUser(@Valid @RequestBody UserJoinRequestDto joinDto){
-        userService.createUser(joinDto);
-        log.info("** Success Signup [{}]",joinDto.getEmail());
-        return new ResponseEntity<>(HttpStatus.CREATED);
-    }
-
-    @PostMapping("/login")
-    public ResponseEntity loginUser(@AuthenticationPrincipal CustomUserDetails userDetails){
-        userService.verifyUser(userDetails.getUsername());
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
 
     @PostMapping("/logout")
     public ResponseEntity logoutUser(@AuthenticationPrincipal CustomUserDetails userDetails){
@@ -53,13 +40,11 @@ public class UserController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-
     @PatchMapping("/token")
     public ResponseEntity reissuanceToken(@AuthenticationPrincipal CustomUserDetails userDetails){
         log.info("** Success Reissuance [{}] Token",userDetails.getUsername());
         return new ResponseEntity<>(HttpStatus.OK);
     }
-
 
     @GetMapping("/information")
     public ResponseEntity getUserInformation(@AuthenticationPrincipal CustomUserDetails userDetails){
