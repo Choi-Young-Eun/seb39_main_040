@@ -13,6 +13,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.filter.CorsFilter;
+import seb39_40.coffeewithme.security.authorization.CustomAccessDeniedHandler;
 import seb39_40.coffeewithme.security.authorization.CustomAuthorizationFilter;
 import seb39_40.coffeewithme.security.authentication.CustomAuthenticationFilter;
 import seb39_40.coffeewithme.security.jwt.JwtProvider;
@@ -28,6 +29,7 @@ public class SecurityConfig {
     private final CustomUserDetailsService customUserDetailsService;
     private final JwtProvider jwtProvider;
     private final AuthenticationConfiguration authenticationConfiguration;
+    private final CustomAccessDeniedHandler customAccessDeniedHandler;
 
 
     @Bean
@@ -48,7 +50,9 @@ public class SecurityConfig {
                 .and()
                 .addFilter(corsFilter)
                 .addFilter(customAuthenticationFilter())
-                .addFilterBefore(customAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(customAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class)
+                .exceptionHandling()
+                .accessDeniedHandler(customAccessDeniedHandler);
         return http.build();
     }
 

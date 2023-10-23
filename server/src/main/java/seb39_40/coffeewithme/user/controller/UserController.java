@@ -43,7 +43,7 @@ public class UserController {
     @PatchMapping("/token")
     public ResponseEntity reissuanceToken(@AuthenticationPrincipal CustomUserDetails userDetails){
         log.info("** Success Reissuance [{}] Token",userDetails.getUsername());
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @GetMapping("/information")

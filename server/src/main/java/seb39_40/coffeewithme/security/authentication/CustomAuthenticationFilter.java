@@ -3,16 +3,14 @@ package seb39_40.coffeewithme.security.authentication;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.DisabledException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.authentication.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import seb39_40.coffeewithme.exception.ErrorResponse;
+import seb39_40.coffeewithme.exception.ExceptionCode;
 import seb39_40.coffeewithme.security.jwt.JwtProvider;
 import seb39_40.coffeewithme.security.userdetails.CustomUserDetails;
 import seb39_40.coffeewithme.security.userdetails.CustomUserDetailsService;
@@ -71,28 +69,13 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
         if(exception instanceof BadCredentialsException){
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.setContentType(APPLICATION_JSON_VALUE);
-            response.setCharacterEncoding("utf-8");
-            ErrorResponse e = ErrorResponse.of(HttpStatus.UNAUTHORIZED,"Email 혹은 Password가 일치하지 않습니다.");
-            log.error("** BadCredentialsException in Login : Email 혹은 Password가 일치하지 않습니다.");
-            new ObjectMapper().writeValue(response.getWriter(), e);
+            setExceptionResponse(response,ExceptionCode.USER_UNAUTHORIZED);
         }
-        else if(exception instanceof DisabledException){
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            response.setContentType(APPLICATION_JSON_VALUE);
-            response.setCharacterEncoding("utf-8");
-            ErrorResponse e = ErrorResponse.of(HttpStatus.BAD_REQUEST,"존재하지 않는 회원입니다.");
-            log.error("** DisabledException in Login : 존재하지 않는 회원입니다.");
-            new ObjectMapper().writeValue(response.getWriter(), e);
+        else if(exception instanceof LockedException){
+            setExceptionResponse(response,ExceptionCode.USER_FORBIDDEN);
         }
         else if(exception instanceof UsernameNotFoundException){
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            response.setContentType(APPLICATION_JSON_VALUE);
-            response.setCharacterEncoding("utf-8");
-            ErrorResponse e = ErrorResponse.of(HttpStatus.BAD_REQUEST,"존재하지 않는 회원입니다.");
-            log.error("** UsernameNotFoundException in Login : 존재하지 않는 회원입니다.");
-            new ObjectMapper().writeValue(response.getWriter(), e);
+            setExceptionResponse(response,ExceptionCode.USER_NOT_FOUND);
         }
     }
 
@@ -101,5 +84,14 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
             return HttpStatus.OK.value();
         else
             return HttpStatus.CREATED.value();
+    }
+
+    private void setExceptionResponse(HttpServletResponse response, ExceptionCode exceptionCode) throws IOException {
+        response.setStatus(exceptionCode.getStatus());
+        response.setContentType(APPLICATION_JSON_VALUE);
+        response.setCharacterEncoding("utf-8");
+        ErrorResponse error = ErrorResponse.of(exceptionCode);
+        new ObjectMapper().writeValue(response.getWriter(), error);
+        log.error("** Exception - Code : {}, Message : {}", exceptionCode.getStatus(), exceptionCode.getMessage());
     }
 }

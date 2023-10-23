@@ -25,9 +25,9 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
         CustomUserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
         if (userDetails.getUser().getStatus().equals(UserStatus.USER_WITHDRAW)) {
-            throw new DisabledException("Provider - authenticate() : 탈퇴한 회원입니다.");
+            throw new DisabledException("탈퇴한 회원입니다.");
         } else if (!passwordEncoder.matches(password, userDetails.getPassword())) {
-            throw new BadCredentialsException("Provider - authenticate() : 비밀번호가 일치하지 않습니다.");
+            throw new BadCredentialsException("비밀번호가 일치하지 않습니다.");
         }
         return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
     }

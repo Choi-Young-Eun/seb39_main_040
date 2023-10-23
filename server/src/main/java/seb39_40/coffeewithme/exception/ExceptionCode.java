@@ -22,10 +22,17 @@ public enum ExceptionCode {
     IMAGE_NOT_FOUND(404, "이미지를 찾을 수 없습니다."),
     TAG_NOT_FOUND(404, "태그를 찾을 수 없습니다."),
 
-    TOKEN_UNAUTHORIZED(401, "유효한 Refresh Token이 아닙니다."),
-    TOKEN_EXPIRATION(401, "만료된 Token 입니다."),
+    // 토큰 관련 Exception
     TOKEN_BAD_REQUEST(400, "JWT Token이 존재하지 않습니다."),
-    TOKEN_PRECONDITION_FAILED(412,"토큰 타입이 일치하지 않습니다."),
+    TOKEN_ACCESS_EXPIRATION(401, "Access Token 이 만료되었습니다."),
+    TOKEN_REFRESH_EXPIRATION(401, "Refresh Token 이 만료되었습니다. 로그인이 필요합니다."),
+    TOKEN_PRECONDITION_FAILED(412,"올바르지 않은 토큰입니다."),
+
+    //유저 관련 Exception
+    USER_UNAUTHORIZED(401,"잘못된 정보로 인증에 실패하였습니다."),
+    USER_FORBIDDEN(403,"탈퇴한 회원입니다"),
+    USER_NOT_FOUND(404,"일치하는 사용자가 없습니다"),
+    
     LIKE_ALREADY_EXISTS(409,"이미 찜한 카페입니다."),
     LIKE_NOT_FOUND(404,"찜한 카페를 찾을 수 없습니다."),
     ALREADY_USED_IMAGE(400,"이미 사용 중인 이미지입니다.");
