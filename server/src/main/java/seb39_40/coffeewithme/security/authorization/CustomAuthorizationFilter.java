@@ -30,6 +30,7 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
     private final JwtProvider jwtProvider;
     private final CustomUserDetailsService detailsService;
     private String TYPE="Bearer ";
+    private final long REFRESH_EXPIRATION= 1000 * 60 * 60;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -48,10 +49,10 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
 
                 if(path.equals("/users/token")){
                     jwtProvider.validationTheSameToken(email, jwt);
-                    String new_at = jwtProvider.createAccessToken(user);
-                    String new_rt = jwtProvider.createRefreshToken(user.getUsername());
+                    String new_at = jwtProvider.createToken("Access Token",user.getUsername());
+                    String new_rt = jwtProvider.createToken("Refresh Token",user.getUsername());
 
-                    jwtProvider.saveRefreshToken(email, new_rt);
+                    jwtProvider.saveToken("Refresh:"+email, new_rt, REFRESH_EXPIRATION);
                     response.setHeader("AccessToken", TYPE + new_at);
                     response.setHeader("RefreshToken", TYPE + new_rt);
                 }
@@ -60,7 +61,7 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
                 filterChain.doFilter(request, response);
             }catch(ExpiredJwtException e){
                 if(path.equals("/api/users/token")){
-                    detailsService.logoutUser2(e.getClaims().get("email").toString());
+                    detailsService.logoutUser(e.getClaims().get("email").toString());
                     setExceptionResponse(response, ExceptionCode.TOKEN_REFRESH_EXPIRATION);
                 }else{
                     setExceptionResponse(response, ExceptionCode.TOKEN_ACCESS_EXPIRATION);

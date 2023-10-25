@@ -13,10 +13,12 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.filter.CorsFilter;
-import seb39_40.coffeewithme.security.authorization.CustomAccessDeniedHandler;
-import seb39_40.coffeewithme.security.authorization.CustomAuthorizationFilter;
+import seb39_40.coffeewithme.security.authorization.*;
 import seb39_40.coffeewithme.security.authentication.CustomAuthenticationFilter;
 import seb39_40.coffeewithme.security.jwt.JwtProvider;
+import seb39_40.coffeewithme.security.logout.CustomLogoutFilter;
+import seb39_40.coffeewithme.security.logout.CustomLogoutHandler;
+import seb39_40.coffeewithme.security.logout.CustomLogoutSuccessHandler;
 import seb39_40.coffeewithme.security.userdetails.CustomUserDetailsService;
 
 
@@ -30,6 +32,7 @@ public class SecurityConfig {
     private final JwtProvider jwtProvider;
     private final AuthenticationConfiguration authenticationConfiguration;
     private final CustomAccessDeniedHandler customAccessDeniedHandler;
+    private final CustomLogoutHandler customLogoutHandler;
 
 
     @Bean
@@ -50,6 +53,7 @@ public class SecurityConfig {
                 .and()
                 .addFilter(corsFilter)
                 .addFilter(customAuthenticationFilter())
+                .addFilter(customLogoutFilter())
                 .addFilterBefore(customAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling()
                 .accessDeniedHandler(customAccessDeniedHandler);
@@ -68,6 +72,14 @@ public class SecurityConfig {
                         customUserDetailsService);
         customAuthenticationFilter.setFilterProcessesUrl("/users/login");
         return customAuthenticationFilter;
+    }
+
+    @Bean
+    public CustomLogoutFilter customLogoutFilter(){
+        CustomLogoutFilter customLogoutFilter =
+                new CustomLogoutFilter(new CustomLogoutSuccessHandler(), customLogoutHandler, jwtProvider);
+        customLogoutFilter.setFilterProcessesUrl("/users/logout");
+        return customLogoutFilter;
     }
 
     @Bean

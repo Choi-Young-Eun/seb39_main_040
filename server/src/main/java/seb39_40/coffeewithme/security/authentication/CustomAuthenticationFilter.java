@@ -28,7 +28,8 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     private final JwtProvider jwtProvider;
     private final CustomUserDetailsService userDetailsService;
-    private String TYPE="Bearer ";
+    private final String TYPE="Bearer ";
+    private final long REFRESH_EXPIRATION= 1000 * 60 * 60;
 
     public CustomAuthenticationFilter(AuthenticationManager authenticationManager, JwtProvider jwtProvider,
                                       CustomUserDetailsService userDetailsService) {
@@ -56,10 +57,10 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException, ServletException {
         CustomUserDetails user = (CustomUserDetails) authResult.getPrincipal();
-        String at = jwtProvider.createAccessToken(user);
-        String rt = jwtProvider.createRefreshToken(user.getUsername());
+        String at = jwtProvider.createToken("Access Token",user.getUsername());
+        String rt = jwtProvider.createToken("Refresh Token",user.getUsername());
 
-        jwtProvider.saveRefreshToken(user.getUsername(),rt);
+        jwtProvider.saveToken("Refresh:"+user.getUsername(),rt, REFRESH_EXPIRATION);
         response.setHeader("AccessToken",TYPE+at);
         response.setHeader("RefreshToken",TYPE+rt);
         response.setStatus(setSuccessResponse(user.getUser()));
@@ -67,7 +68,7 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
     }
 
     @Override
-    protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
+    protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException {
         if(exception instanceof BadCredentialsException){
             setExceptionResponse(response,ExceptionCode.USER_UNAUTHORIZED);
         }

@@ -34,4 +34,10 @@ public class CustomUserDetailsService implements UserDetailsService {
         userRepository.save(user);
         return true;
     }
+
+    public void logoutUser(String email){
+        User user = loadUserByUsername(email).getUser();
+        user.updateStatus(UserStatus.USER_LOGOUT);
+        userRepository.save(user);
+    }
 }

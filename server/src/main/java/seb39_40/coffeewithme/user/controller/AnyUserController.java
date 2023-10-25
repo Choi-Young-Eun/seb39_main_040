@@ -23,5 +23,4 @@ public class AnyUserController {
         log.info("** Success Signup [{}]",joinDto.getEmail());
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
-
 }

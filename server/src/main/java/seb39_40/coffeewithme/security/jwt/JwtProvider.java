@@ -3,56 +3,54 @@ package seb39_40.coffeewithme.security.jwt;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 import java.util.Date;
 
 @Component
 @RequiredArgsConstructor
 public class JwtProvider {
-    private int ACCESS_EXPIRATION= 1000 * 60 * 10;
-    private String SECRET_KEY="cwmsecretkeycwmsecretkeycwmsecretkeycwmsecretkey";
+    private final long ACCESS_EXPIRATION= 1000 * 60 * 10;
+    private final long REFRESH_EXPIRATION= 1000 * 60 * 60;
+    private final String SECRET_KEY="cwmsecretkeycwmsecretkeycwmsecretkeycwmsecretkey";
     private final RedisRepository redisRepository;
 
-    public String createAccessToken(Long id,String email, String role){
+    public String createToken(String type, String email){
         SecretKey key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(SECRET_KEY));
+        long expiration = 0;
+        String subject=type;
+        if(type.equals("Access Token")){
+            expiration = ACCESS_EXPIRATION;
+        }else if(type.equals("Refresh Token")){
+            expiration = REFRESH_EXPIRATION;
+        }
+        else throw new JwtException("존재하는 토큰 타입이 아닙니다.");
 
         return Jwts.builder()
                 .signWith(key)
                 .setHeaderParam("typ","JWT")
-                .setSubject("Access Token")
-                .claim("id",id)
+                .setSubject(subject)
                 .claim("email",email)
-                .claim("role",role)
-                .setExpiration(new Date(System.currentTimeMillis()+ACCESS_EXPIRATION))
+                .setExpiration(new Date(System.currentTimeMillis()+expiration))
                 .compact();
     }
 
-    public String createRefreshToken(String email){
-        SecretKey key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(SECRET_KEY));
-
-        return Jwts.builder()
-                .signWith(key, SignatureAlgorithm.HS256)
-                .setHeaderParam("typ","JWT")
-                .setSubject("Refresh Token")
-                //.setExpiration(new Date(System.currentTimeMillis()+REFRESH_EXPIRATION))
-                .claim("email",email)
-                .compact();
-    }
-
-    public void saveRefreshToken(String email,String token){
-        redisRepository.save(token, email);
+    public void saveToken(String email,String token, Long expiration){
+        redisRepository.save(token, email, expiration);
     }
 
     public void removeRefreshToken(String email){
         redisRepository.remove(email);
+    }
+
+    public String substringToken(String token){
+        if(!token.startsWith("Bearer "))
+            throw new JwtException("JWT 토큰 형식이 올바르지 않습니다.");
+        else return token.replace("Bearer ", "");
     }
 
     public Claims parseToken(String jwt){
@@ -66,14 +64,13 @@ public class JwtProvider {
 
     public void validationTheSameToken(String email,String token){
         String result = redisRepository.findByEmail(email);
-        if(!result.equals(token))
-            throw new JwtException("유효하지 않은 Refresh Token 입니다.");
+        if(result==null || !result.equals(token))
+            throw new JwtException("토큰이 올바르지 않습니다.");
     }
 
-    public String substringToken(String token){
-        if(!token.startsWith("Bearer "))
-            throw new JwtException("JWT 토큰 형식이 올바르지 않습니다.");
-        else return token.replace("Bearer ", "");
+    public Long getExpirationToClaims(Claims claims){
+        Long time = claims.getExpiration().getTime();
+        return time- new Date().getTime();
     }
 
     public String getEmailToClaims(Claims claims){

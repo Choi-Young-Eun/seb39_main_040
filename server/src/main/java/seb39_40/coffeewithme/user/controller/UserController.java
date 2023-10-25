@@ -26,13 +26,6 @@ public class UserController {
     private final UserService userService;
     private final UserMapper userMapper;
 
-
-    @PostMapping("/logout")
-    public ResponseEntity logoutUser(@AuthenticationPrincipal CustomUserDetails userDetails){
-        log.info("** Success Logout [{}]",userDetails.getUsername());
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
-
     @PostMapping("/withdraw")
     public ResponseEntity withdrawUser(@AuthenticationPrincipal CustomUserDetails userDetails){
         userService.withdrawUser(userDetails.getUsername());
