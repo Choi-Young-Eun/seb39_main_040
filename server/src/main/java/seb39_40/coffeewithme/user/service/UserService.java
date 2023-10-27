@@ -71,13 +71,6 @@ public class UserService {
         return reviewList;
     }
 
-    public void verifyUser(String email){
-        User user=userRepository.findByEmail(email).get();
-        if(user.getStatus().equals(UserStatus.USER_WITHDRAW)) {
-            throw new BusinessLogicException(HttpStatus.FORBIDDEN,"이미 탈퇴한 회원입니다.");
-        }
-    }
-
     private void verifyEmail(String email){
         Optional<User> user=userRepository.findByEmail(email);
         if(user.isPresent()) {

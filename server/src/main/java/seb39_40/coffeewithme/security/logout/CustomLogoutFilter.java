@@ -54,7 +54,7 @@ public class CustomLogoutFilter extends LogoutFilter {
             }catch(ExpiredJwtException e){
                 setExceptionResponse(httpResponse, ExceptionCode.TOKEN_ACCESS_EXPIRATION);
             }catch(JwtException e){
-                    setExceptionResponse(httpResponse, ExceptionCode.TOKEN_PRECONDITION_FAILED);
+                setExceptionResponse(httpResponse, ExceptionCode.TOKEN_PRECONDITION_FAILED);
             }
         }else {
             chain.doFilter(request, response);

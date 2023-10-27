@@ -19,14 +19,20 @@ public class RedisRepository {
     }
 
     public String findByEmail(String user){
-        String redis = (String) redisTemplate.opsForValue().get(user);
+        String redis = (String) redisTemplate.opsForValue().get("Refresh:"+user);
         if(Objects.isNull(redis))
             throw new JwtException("Refresh Token이 존재하지 않습니다. 재로그인이 필요합니다.");
         return redis;
     }
 
+    public void findByAccessToken(String accessToken){
+        String redis = (String) redisTemplate.opsForValue().get("BAN:"+accessToken);
+        if(!Objects.isNull(redis))
+            throw new JwtException("사용 중지된 토큰입니다. 다른 토큰을 이용해주세요");
+    }
+
     public void remove(String key){
-        Object savedRefToken = redisTemplate.opsForValue().getAndDelete(key);
+        Object savedRefToken = redisTemplate.opsForValue().getAndDelete("Refresh:"+key);
         if(Objects.isNull(savedRefToken))
             throw new JwtException("현재 요청 처리 중인 유저로 잠시후 다시 로그아웃을 시도해시기 바랍니다.");
     }

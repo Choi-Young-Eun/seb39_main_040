@@ -22,11 +22,13 @@ public class JwtProvider {
     public String createToken(String type, String email){
         SecretKey key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(SECRET_KEY));
         long expiration = 0;
-        String subject=type;
-        if(type.equals("Access Token")){
+        String subject;
+        if(type.equals(TokenType.ACCESS.getType())){
             expiration = ACCESS_EXPIRATION;
-        }else if(type.equals("Refresh Token")){
+            subject = TokenType.ACCESS.getType();
+        }else if(type.equals(TokenType.REFRESH.getType())){
             expiration = REFRESH_EXPIRATION;
+            subject = TokenType.REFRESH.getType();
         }
         else throw new JwtException("존재하는 토큰 타입이 아닙니다.");
 
@@ -68,6 +70,16 @@ public class JwtProvider {
             throw new JwtException("토큰이 올바르지 않습니다.");
     }
 
+    public void validationSubjectToClaims(Claims claims, String type){
+        if(!claims.getSubject().equals(type)){
+            throw new JwtException("올바르지 않은 토큰입니다.");
+        }
+    }
+
+    public void validationTheBanAccessToken(String token){
+        redisRepository.findByAccessToken(token);
+    }
+
     public Long getExpirationToClaims(Claims claims){
         Long time = claims.getExpiration().getTime();
         return time- new Date().getTime();
@@ -76,4 +88,5 @@ public class JwtProvider {
     public String getEmailToClaims(Claims claims){
         return claims.get("email").toString();
     }
+
 }

@@ -22,9 +22,10 @@ public class CustomLogoutHandler implements LogoutHandler {
         String email = authentication.getPrincipal().toString();
         String token = authentication.getCredentials().toString();
 
+        jwtProvider.validationTheBanAccessToken(token);
         Claims claims = jwtProvider.parseToken(token);
 
-        jwtProvider.removeRefreshToken("Refresh:"+email);
+        jwtProvider.removeRefreshToken(email);
         jwtProvider.saveToken("BAN:"+token,email, jwtProvider.getExpirationToClaims(claims));
         userDetailsService.logoutUser(email);
     }

@@ -1,6 +1,5 @@
 package seb39_40.coffeewithme.exception;
 
-import io.jsonwebtoken.JwtException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -26,7 +25,7 @@ public class GlobalExceptionAdvice {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
     public ErrorResponse handleMethodNotAllowedException(HttpRequestMethodNotSupportedException e) {
-        final ErrorResponse response = ErrorResponse.of(HttpStatus.METHOD_NOT_ALLOWED);
+        final ErrorResponse response = ErrorResponse.of(ExceptionCode.METHOD_NOT_ALLOWED);
         log.error("** HttpRequestMethodNotSupportedException : {}", response.getMessage());
         return response;
     }

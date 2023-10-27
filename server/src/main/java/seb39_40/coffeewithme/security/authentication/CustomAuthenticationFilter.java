@@ -12,6 +12,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import seb39_40.coffeewithme.exception.ErrorResponse;
 import seb39_40.coffeewithme.exception.ExceptionCode;
 import seb39_40.coffeewithme.security.jwt.JwtProvider;
+import seb39_40.coffeewithme.security.jwt.TokenType;
 import seb39_40.coffeewithme.security.userdetails.CustomUserDetails;
 import seb39_40.coffeewithme.security.userdetails.CustomUserDetailsService;
 import seb39_40.coffeewithme.user.domain.User;
@@ -57,8 +58,8 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException, ServletException {
         CustomUserDetails user = (CustomUserDetails) authResult.getPrincipal();
-        String at = jwtProvider.createToken("Access Token",user.getUsername());
-        String rt = jwtProvider.createToken("Refresh Token",user.getUsername());
+        String at = jwtProvider.createToken(TokenType.ACCESS.getType(),user.getUsername());
+        String rt = jwtProvider.createToken(TokenType.REFRESH.getType(), user.getUsername());
 
         jwtProvider.saveToken("Refresh:"+user.getUsername(),rt, REFRESH_EXPIRATION);
         response.setHeader("AccessToken",TYPE+at);

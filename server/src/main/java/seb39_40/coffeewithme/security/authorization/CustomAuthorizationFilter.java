@@ -13,6 +13,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import seb39_40.coffeewithme.exception.ErrorResponse;
 import seb39_40.coffeewithme.exception.ExceptionCode;
 import seb39_40.coffeewithme.security.jwt.JwtProvider;
+import seb39_40.coffeewithme.security.jwt.TokenType;
 import seb39_40.coffeewithme.security.userdetails.CustomUserDetails;
 import seb39_40.coffeewithme.security.userdetails.CustomUserDetailsService;
 
@@ -45,12 +46,19 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
                 Claims claims = jwtProvider.parseToken(jwt);
                 String email = jwtProvider.getEmailToClaims(claims);
 
+                if(path.equals("/api/users/token")){
+                    jwtProvider.validationSubjectToClaims(claims, TokenType.REFRESH.getType());
+                }else{
+                    jwtProvider.validationSubjectToClaims(claims, TokenType.ACCESS.getType());
+                    jwtProvider.validationTheBanAccessToken(jwt);
+                }
+
                 CustomUserDetails user = detailsService.loadUserByUsername(email);
 
-                if(path.equals("/users/token")){
+                if(path.equals("/api/users/token")){
                     jwtProvider.validationTheSameToken(email, jwt);
-                    String new_at = jwtProvider.createToken("Access Token",user.getUsername());
-                    String new_rt = jwtProvider.createToken("Refresh Token",user.getUsername());
+                    String new_at = jwtProvider.createToken(TokenType.ACCESS.getType(), user.getUsername());
+                    String new_rt = jwtProvider.createToken(TokenType.REFRESH.getType(), user.getUsername());
 
                     jwtProvider.saveToken("Refresh:"+email, new_rt, REFRESH_EXPIRATION);
                     response.setHeader("AccessToken", TYPE + new_at);
