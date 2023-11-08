@@ -2,6 +2,7 @@ package seb39_40.coffeewithme.user.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import seb39_40.coffeewithme.image.domain.Image;
 import seb39_40.coffeewithme.image.dto.ImageResponseDto;
 import seb39_40.coffeewithme.user.domain.User;
 
@@ -13,10 +14,10 @@ public class UserInfoResponseDto{
     private String mobile;
     private ImageResponseDto profilePhoto;
 
-    public static UserInfoResponseDto from(User user){
+    public static UserInfoResponseDto from(User user, Image profilePhoto){
         ImageResponseDto imageDto=new ImageResponseDto();
-        imageDto.setId(user.getProfilePhoto().getId());
-        imageDto.setPath(user.getProfilePhoto().getName());
+        imageDto.setId(profilePhoto.getId());
+        imageDto.setPath(profilePhoto.getName());
         return new UserInfoResponseDto(user.getUserName(), user.getEmail(), user.getMobile(), imageDto);
     }
 }

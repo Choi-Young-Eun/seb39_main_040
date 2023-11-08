@@ -31,9 +31,6 @@ public class User {
     @Column(nullable = false, length = 50, name="reg_dt")
     private LocalDate registerDate;
 
-    @OneToOne(mappedBy = "user")
-    private Image profilePhoto;
-
     @OneToMany(mappedBy = "user")
     private List<Review> reviews=new ArrayList<>();
 
@@ -47,7 +44,6 @@ public class User {
         this.roles=roles;
         this.status=status;
         this.registerDate=registerDate;
-        this.profilePhoto=profilePhoto;
     }
 
     public List<String> getRoleList(){
@@ -64,21 +60,8 @@ public class User {
         }
     }
 
-    public void updateStatus(UserStatus status){
-        this.status=status;
-    }
-
-    public void updateInformation(String userName, String mobile, Image profilePhoto){
+    public void updateInformation(String userName, String mobile){
         this.userName = userName;
         this.mobile=mobile;
-        this.profilePhoto.setUser(null);
-        setProfilePhoto(profilePhoto);
-    }
-
-    public void setProfilePhoto(Image image){
-        this.profilePhoto = image;
-        if (image.getUser() != this){
-            image.setUser(this);
-        }
     }
 }

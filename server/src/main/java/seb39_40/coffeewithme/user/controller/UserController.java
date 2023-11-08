@@ -8,9 +8,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import seb39_40.coffeewithme.security.userdetails.CustomUserDetails;
 import seb39_40.coffeewithme.review.domain.Review;
-import seb39_40.coffeewithme.user.domain.User;
 import seb39_40.coffeewithme.user.dto.request.UserUpdateRequestDto;
-import seb39_40.coffeewithme.user.dto.response.UserInfoResponseDto;
 import seb39_40.coffeewithme.user.mapper.UserMapper;
 import seb39_40.coffeewithme.user.service.UserService;
 
@@ -42,16 +40,14 @@ public class UserController {
     @GetMapping("/information")
     public ResponseEntity getUserInformation(@AuthenticationPrincipal CustomUserDetails userDetails){
         log.info("** Get [{}] Information",userDetails.getUsername());
-        User user = userService.getInformation(userDetails.getUsername());
-        return new ResponseEntity<>(UserInfoResponseDto.from(user), HttpStatus.OK);
+        return new ResponseEntity<>(userService.getInformation(userDetails.getUsername()), HttpStatus.OK);
     }
 
     @PatchMapping("/information")
     public ResponseEntity updateUserInformation(@AuthenticationPrincipal CustomUserDetails userDetails,
                                                 @Valid @RequestBody UserUpdateRequestDto updateDto){
         log.info("** Patch [{}] Information",userDetails.getUsername());
-        User result = userService.updateInformation(userDetails.getUsername(), updateDto);
-        return new ResponseEntity<>(UserInfoResponseDto.from(result), HttpStatus.OK);
+        return new ResponseEntity<>(userService.updateInformation(userDetails.getUsername(), updateDto), HttpStatus.OK);
     }
 
     @GetMapping("/reviews")
