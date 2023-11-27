@@ -1,4 +1,4 @@
-package seb39_40.coffeewithme.user.controller;
+package seb39_40.coffeewithme.wishlist.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -10,7 +10,7 @@ import seb39_40.coffeewithme.cafe.domain.Cafe;
 import seb39_40.coffeewithme.cafe.mapper.CafeMapper;
 import seb39_40.coffeewithme.security.userdetails.CustomUserDetails;
 import seb39_40.coffeewithme.user.mapper.UserMapper;
-import seb39_40.coffeewithme.user.service.WishlistService;
+import seb39_40.coffeewithme.wishlist.service.WishlistService;
 
 import java.util.List;
 

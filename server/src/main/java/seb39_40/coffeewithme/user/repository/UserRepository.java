@@ -5,6 +5,6 @@ import seb39_40.coffeewithme.user.domain.User;
 
 import java.util.Optional;
 
-public interface UserRepository extends JpaRepository<User, Long> {
+public interface UserRepository extends JpaRepository<User, Long>, UserCustomRepository {
     Optional<User> findByEmail(String email);
 }

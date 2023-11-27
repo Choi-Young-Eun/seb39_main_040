@@ -1,6 +1,7 @@
 package seb39_40.coffeewithme.security.userdetails;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.ToString;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import seb39_40.coffeewithme.user.domain.User;
@@ -8,16 +9,15 @@ import seb39_40.coffeewithme.user.domain.User;
 import java.util.ArrayList;
 import java.util.Collection;
 
-@Data
+@Getter
+@ToString
 public class CustomUserDetails implements UserDetails {
     private User user;
     public CustomUserDetails(User user){
         this.user=user;
     }
 
-    //Authentication 타입의 객체가 넘어오고 그 안에 Member 정보가 있습니다.
-
-    @Override //User의 권한을 반환합니다
+    @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         Collection<GrantedAuthority> authorities = new ArrayList<>();
         user.getRoleList().forEach(n -> {

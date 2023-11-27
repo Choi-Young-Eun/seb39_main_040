@@ -12,9 +12,7 @@ import java.util.List;
 
 @Entity
 @Getter
-@Builder
 @NoArgsConstructor
-@AllArgsConstructor
 public class User {
     @Id @Column(name = "USER_ID")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,14 +31,20 @@ public class User {
     @Column(nullable = false, length = 50, name="reg_dt")
     private LocalDate registerDate;
 
-    @OneToOne(mappedBy = "user")
-    private Image profilePhoto;
-
-    @Transient
-    private List<Wishlist> likes=new ArrayList<>();
-
     @OneToMany(mappedBy = "user")
     private List<Review> reviews=new ArrayList<>();
+
+    @Builder
+    public User(String userName, String password, String email, String mobile, String roles,
+         UserStatus status, LocalDate registerDate, Image profilePhoto){
+        this.userName=userName;
+        this.password=password;
+        this.email=email;
+        this.mobile=mobile;
+        this.roles=roles;
+        this.status=status;
+        this.registerDate=registerDate;
+    }
 
     public List<String> getRoleList(){
         if(this.roles.length() > 0){
@@ -49,19 +53,6 @@ public class User {
         return new ArrayList<>();
     }
 
-    public enum UserStatus {
-        USER_SIGNUP("signup"),
-        USER_WITHDRAW("withdraw");
-
-        @Getter
-        private String status;
-
-        UserStatus(String status) {
-            this.status = status;
-        }
-    }
-
-
     public void addReview(Review review) {
         this.reviews.add(review);
         if (review.getUser() != this) {
@@ -69,21 +60,8 @@ public class User {
         }
     }
 
-    public void updateStatus(UserStatus status){
-        this.status=status;
-    }
-
-    public void updateInformation(String userName, String mobile, Image profilePhoto){
+    public void updateInformation(String userName, String mobile){
         this.userName = userName;
         this.mobile=mobile;
-        this.profilePhoto.setUser(null);
-        setProfilePhoto(profilePhoto);
-    }
-
-    public void setProfilePhoto(Image image){
-        this.profilePhoto = image;
-        if (image.getUser() != this){
-            image.setUser(this);
-        }
     }
 }

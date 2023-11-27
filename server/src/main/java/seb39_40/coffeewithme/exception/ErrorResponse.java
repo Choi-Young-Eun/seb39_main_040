@@ -37,8 +37,8 @@ public class ErrorResponse {
         return new ErrorResponse(null,null,status.value(), message);
     }
 
-    public static ErrorResponse of(HttpStatus httpStatus){
-        return new ErrorResponse(null,null, httpStatus.value(), httpStatus.getReasonPhrase());
+    public static ErrorResponse of(ExceptionCode code){
+        return new ErrorResponse(null,null,code.getStatus(), code.getMessage());
     }
 
     @Getter

@@ -6,17 +6,16 @@ import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import seb39_40.coffeewithme.exception.ErrorResponse;
+import seb39_40.coffeewithme.exception.ExceptionCode;
 import seb39_40.coffeewithme.security.jwt.JwtProvider;
+import seb39_40.coffeewithme.security.jwt.TokenType;
 import seb39_40.coffeewithme.security.userdetails.CustomUserDetails;
-import seb39_40.coffeewithme.user.domain.User;
-import seb39_40.coffeewithme.user.repository.UserRepository;
+import seb39_40.coffeewithme.security.userdetails.CustomUserDetailsService;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -27,73 +26,69 @@ import java.io.IOException;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @Slf4j
-@Component
 @RequiredArgsConstructor
 public class CustomAuthorizationFilter extends OncePerRequestFilter {
     private final JwtProvider jwtProvider;
-    private final UserRepository userRepository;
+    private final CustomUserDetailsService detailsService;
     private String TYPE="Bearer ";
+    private final long REFRESH_EXPIRATION= 1000 * 60 * 60;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String path = request.getServletPath();
-        String token;
+        String token = request.getHeader("Token");
 
-        if (path.equals("/users/login") || path.equals("/users/signup")
-                || (request.getRequestURI().startsWith("/cafe") && request.getMethod().equals("GET"))) {
+        if(!request.getRequestURI().startsWith("/api")){
             filterChain.doFilter(request, response);
-        }else {
-            if(path.equals("/users/token"))
-                token = request.getHeader("RefreshToken");
-            else
-                token = request.getHeader("AccessToken");
-
+        }else{
             try{
                 String jwt = jwtProvider.substringToken(token);
                 Claims claims = jwtProvider.parseToken(jwt);
                 String email = jwtProvider.getEmailToClaims(claims);
 
-                if(path.equals("/users/token")){
-                    jwtProvider.validationTheSameToken(email, jwt);
-                    User user = userRepository.findByEmail(email).get();
-                    String new_at = jwtProvider.createAccessToken(user.getId(), email, user.getRoles());
-                    String new_rt = jwtProvider.createRefreshToken(email);
+                if(path.equals("/api/users/token")){
+                    jwtProvider.validationSubjectToClaims(claims, TokenType.REFRESH.getType());
+                }else{
+                    jwtProvider.validationSubjectToClaims(claims, TokenType.ACCESS.getType());
+                    jwtProvider.validationTheBanAccessToken(jwt);
+                }
 
-                    jwtProvider.saveRefreshToken(email, new_rt);
+                CustomUserDetails user = detailsService.loadUserByUsername(email);
+
+                if(path.equals("/api/users/token")){
+                    jwtProvider.validationTheSameToken(email, jwt);
+                    String new_at = jwtProvider.createToken(TokenType.ACCESS.getType(), user.getUsername());
+                    String new_rt = jwtProvider.createToken(TokenType.REFRESH.getType(), user.getUsername());
+
+                    jwtProvider.saveToken("Refresh:"+email, new_rt, REFRESH_EXPIRATION);
                     response.setHeader("AccessToken", TYPE + new_at);
                     response.setHeader("RefreshToken", TYPE + new_rt);
                 }
-                    User userEntity = userRepository.findByEmail(email).get();
-
-                    CustomUserDetails principalDetails = new CustomUserDetails(userEntity);
-                    Authentication authentication = new UsernamePasswordAuthenticationToken(principalDetails, null, principalDetails.getAuthorities());
-                    SecurityContextHolder.getContext().setAuthentication(authentication);
-
-                    filterChain.doFilter(request, response);
-
+                Authentication authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+                filterChain.doFilter(request, response);
             }catch(ExpiredJwtException e){
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                response.setContentType(APPLICATION_JSON_VALUE);
-                response.setCharacterEncoding("utf-8");
-                ErrorResponse errorResponse = ErrorResponse.of(HttpStatus.UNAUTHORIZED,"만료된 Token 입니다. 재발급 받으세요.");
-                log.error("** ExpiredJwtException in Authorization : 만료된 Token으로 들어온 요청입니다.");
-                new ObjectMapper().writeValue(response.getWriter(), errorResponse);
+                if(path.equals("/api/users/token")){
+                    detailsService.logoutUser(e.getClaims().get("email").toString());
+                    setExceptionResponse(response, ExceptionCode.TOKEN_REFRESH_EXPIRATION);
+                }else{
+                    setExceptionResponse(response, ExceptionCode.TOKEN_ACCESS_EXPIRATION);
+                }
             }catch(NullPointerException e){
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.setContentType(APPLICATION_JSON_VALUE);
-                response.setCharacterEncoding("utf-8");
-                ErrorResponse errorResponse = ErrorResponse.of(HttpStatus.BAD_REQUEST,"토큰 정보가 요청에 담기지 않았습니다.");
-                log.error("** NullPointerException in Authorization : 토큰 정보가 요청에 담기지 않았습니다.");
-                new ObjectMapper().writeValue(response.getWriter(), errorResponse);
+                setExceptionResponse(response, ExceptionCode.TOKEN_BAD_REQUEST);
             }catch(JwtException e){
-                response.setStatus(HttpServletResponse.SC_PRECONDITION_FAILED);
-                response.setContentType(APPLICATION_JSON_VALUE);
-                response.setCharacterEncoding("utf-8");
-                ErrorResponse errorResponse = ErrorResponse.of(HttpStatus.PRECONDITION_FAILED,e.getMessage());
-                log.error("** JwtException in Authorization : {}",e.getMessage());
-                new ObjectMapper().writeValue(response.getWriter(), errorResponse);
+                setExceptionResponse(response, ExceptionCode.TOKEN_PRECONDITION_FAILED);
             }
         }
+    }
+
+    private void setExceptionResponse(HttpServletResponse response, ExceptionCode exceptionCode) throws IOException {
+        response.setStatus(exceptionCode.getStatus());
+        response.setContentType(APPLICATION_JSON_VALUE);
+        response.setCharacterEncoding("utf-8");
+        ErrorResponse error = ErrorResponse.of(exceptionCode);
+        new ObjectMapper().writeValue(response.getWriter(), error);
+        log.error("** Exception - Code : {}, Message : {}", exceptionCode.getStatus(), exceptionCode.getMessage());
     }
 }
 

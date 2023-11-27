@@ -1,14 +1,20 @@
 package seb39_40.coffeewithme.security.userdetails;
 
 
+import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.access.AuthorizationServiceException;
+import org.springframework.security.authentication.AccountStatusException;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import seb39_40.coffeewithme.user.domain.User;
+import seb39_40.coffeewithme.user.domain.UserStatus;
 import seb39_40.coffeewithme.user.repository.UserRepository;
 
+import javax.security.auth.login.AccountException;
 import java.util.Optional;
 
 
@@ -20,10 +26,19 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public CustomUserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        //존재하지 않는 회원의 경우 먼저 처리하고 user entity 꺼내기 (이 부분이 현재 삭제됨)
         Optional<User> userEntity = userRepository.findByEmail(email);
         if(!userEntity.isPresent())
-                throw new UsernameNotFoundException("존재하지 않는 이메일입니다.");
+            throw new UsernameNotFoundException("존재하지 않는 이메일입니다.");
         return new CustomUserDetails(userEntity.get());
+    }
+
+    public boolean loginUser(User user){
+        if(user.getStatus().equals(UserStatus.USER_LOGIN)) return false;
+        userRepository.updateUserStatus(user.getEmail(),UserStatus.USER_LOGIN);
+        return true;
+    }
+
+    public void logoutUser(String email){
+        userRepository.updateUserStatus(email,UserStatus.USER_LOGOUT);
     }
 }
