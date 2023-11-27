@@ -29,8 +29,6 @@ public class CustomUserDetailsService implements UserDetailsService {
         Optional<User> userEntity = userRepository.findByEmail(email);
         if(!userEntity.isPresent())
             throw new UsernameNotFoundException("존재하지 않는 이메일입니다.");
-        if(!userEntity.get().getStatus().equals(UserStatus.USER_LOGIN))
-            throw new JwtException( "올바른 토큰이 아닙니다. 로그인 상태가 아닙니다.");
         return new CustomUserDetails(userEntity.get());
     }
 

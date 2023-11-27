@@ -47,7 +47,7 @@ public class SecurityConfig {
                 .httpBasic().disable()
                 .authorizeRequests()
                 .antMatchers("/api/admin/**").hasRole("ADMIN")
-                .antMatchers("/api/user/**").hasRole("USER") //로그인 한 사용자만 사용할 수 잇도록
+                .antMatchers("/api/users/**").hasRole("USER") //로그인 한 사용자만 사용할 수 잇도록
                 .antMatchers("/api/**").authenticated()
                 .anyRequest().permitAll()
                 .and()
